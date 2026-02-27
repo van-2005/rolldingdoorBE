@@ -1,0 +1,29 @@
+﻿const { Sequelize } = require("sequelize");
+
+// Hardcoded DB config (migrated from .env for deployment)
+const DATABASE_URL = "postgresql://postgres:@Van0862215231@db.pmtqgnrqpciyumujauos.supabase.co:5432/postgres";
+const USE_SSL = true;
+
+const sequelize = new Sequelize(DATABASE_URL, {
+  dialect: "postgres",
+  logging: false, // Set to console.log để xem SQL queries
+  dialectOptions: {
+    ssl: USE_SSL ? { require: true, rejectUnauthorized: false } : false,
+  },
+});
+
+const connectDB = async () => {
+  try {
+    await sequelize.authenticate();
+    console.log("Đã kết nối PostgreSQL...");
+    
+    // Sync models (tạo bảng nếu chưa tồn tại)
+    await sequelize.sync({ alter: false });
+    console.log("Database synchronized.");
+  } catch (err) {
+    console.error("Lỗi kết nối PostgreSQL:", err.message);
+    process.exit(1);
+  }
+};
+
+module.exports = { sequelize, connectDB };
