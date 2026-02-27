@@ -68,12 +68,8 @@ mqttClient.on("message", (topic, message) => {
 });
 // --- Kết thúc MQTT Client ---
 
-// Kết nối Database
-connectDB();
-
 // Khởi tạo Bộ hẹn giờ và truyền mqttClient vào
 const scheduler = new Scheduler(mqttClient);
-scheduler.start();
 
 // Middlewares cho Express
 app.use(cors());
@@ -106,9 +102,20 @@ const createAdminAccount = async () => {
     console.error("Lỗi khi tạo tài khoản Admin:", error);
   }
 };
-createAdminAccount();
 
-// Khởi động API Server Express
-app.listen(API_PORT, () => {
-  console.log(`API Server đang chạy trên port ${API_PORT}`);
-});
+const bootstrap = async () => {
+  try {
+    await connectDB();
+    await scheduler.start();
+    await createAdminAccount();
+
+    app.listen(API_PORT, () => {
+      console.log(`API Server đang chạy trên port ${API_PORT}`);
+    });
+  } catch (error) {
+    console.error("Lỗi khởi động ứng dụng:", error);
+    process.exit(1);
+  }
+};
+
+bootstrap();
